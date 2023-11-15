@@ -1,0 +1,35 @@
+WindowsManager
+    FirstScreen
+    InventoryScreen
+
+<FirstScreen>
+    name: 'first_screen'
+    MDBoxLayout:
+        orientation: 'vertical'
+        #size_hint: 1, 1
+        padding: [200, 50, 200, 50]
+        spacing: 10
+        #adaptive_height: True
+        #adaptive_width: True
+        #adaptive_size: True
+        md_bg_color: 'orange'
+
+        MDRaisedButton:
+            id: button_inv
+            text: 'Инвентаризация'
+            font_size: 20
+            on_release: app.show_confirmation_dialog('inventory')
+            pos_hint: {'center_x':.5, 'center_y':.5}
+
+        MDRaisedButton:
+            text: 'Отчеты'
+            font_size: 20
+            on_release: app.show_confirmation_dialog('report')
+            pos_hint: {'center_x':.5, 'center_y':.5}
+
+
+<InventoryScreen>
+
+    name: 'inventory_screen'
+
+
