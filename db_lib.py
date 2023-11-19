@@ -3,7 +3,7 @@ import config
 import pyodbc
 import requests as r
 from pprint import pprint
-from Report import Report
+from report import Report
 import asyncio
 import os
 

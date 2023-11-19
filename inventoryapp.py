@@ -14,11 +14,14 @@ from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.label import MDLabel
 
 import config
-from Report import Report
+import scaner
+from scaner import Scaner
+from report import Report
 from layouts import DialogContentUniversy
-from DB_Lib import DBLib
+from db_lib import DBLib
 import datetime
 import asyncio
+import os
 
 INVENTORY = 'inventory'
 REPORT = 'report'
@@ -145,6 +148,8 @@ class InventoryApp(MDApp):
         self.dict_file_search = config.DICT_FILES
         self.dialog = None
         self.conf_dialog = None
+        self.scaner = Scaner(self)
+        self.scaner_status = scaner.DISCONNECT
         #self.index = '1'
         self.inventory = False
         self.strangers = []
@@ -167,8 +172,7 @@ class InventoryApp(MDApp):
 
 
     def build(self):
-
-
+        self.scaner_status = asyncio.create_task(self.scaner.get_connect())
         self.theme_cls.primary_palette = 'DeepPurple'
         return self.screen
 
