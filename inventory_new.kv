@@ -12,18 +12,22 @@ WindowsManager
             padding: [50, 10, 50, 10]
             spacing: 1
             md_bg_color: 'orange'
+
+            MDRaisedButton:
+                text: 'Сканер:'
+                on_release: app.show_params_dialog('scaner')
+
             MDIconButton
                 id: icon_button_scan
                 icon: 'close-circle-outline'
                 user_font_size: 32
-                pos_hint: {'center_x':.5, 'center_y':.5}
+                pos_hint: {'center_x':.5, 'center_y':.4}
                 theme_text_color: 'Custom'
                 text_color: 'red'
             MDLabel:
-                text: 'Сканер:'
-            MDLabel:
                 id: ip_label
                 text: 'не найден'
+
         MDBoxLayout:
             orientation: 'vertical'
             size_hint: 1, 0.9

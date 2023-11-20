@@ -15,10 +15,13 @@ class Scaner:
     def __init__(self, app):
         self.app = app
         self.main_ip = socket.gethostbyname(socket.gethostname())
+        self.ip = None
+        self.port = None
         self.socket = None
         self.status = SEARCH
         self.writer = None
         self.reader = None
+        self.search = False
 
     async def get_connect(self):
         print('Попытка соединения со сканером...')
@@ -26,38 +29,42 @@ class Scaner:
             data = json.load(params)
             if data["ip_scaner"]:
                 print(data['ip_scaner'])
+                self.ip = data['ip_scaner']
+                self.port = data['port']
                 ans = await self.connect(data["ip_scaner"], data["port"])
                 if ans == self.empty:
                     await self.connect_scaner(data["ip_scaner"], data["port"])
                     self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
                     return CONNECT
 
-        ip = await self.search_scaner(data["port"])
-        if ip:
-            print("Опа!")
-            await self.connect_scaner(ip, data["port"])
-            with open('params.json', 'w') as params:
-                data["ip_scaner"] = ip
-                print(data)
-                json.dump(data, params, indent=2)
-            return CONNECT
         self.change_inform('close-circle-outline', 'red', 'не найден')
         return DISCONNECT
 
 
-    async def search_scaner(self, port):
+    async def search_scaner(self):
         print('Пошел поиск...')
-        self.change_inform('sync-circle', 'blue', 'поиск')
+        #self.change_inform('sync-circle', 'blue', 'поиск')
+        self.search = True
 
         list_ip = self.main_ip.split('.')
-        for i in range(0, 254):
+        for i in range(200, 254):
+            if not self.search:
+                break
             ip = '.'.join(list_ip[:3]) + '.' + str(i)
-            ans = await (self.connect(ip, port))
+            ans = await (self.connect(ip, self.port))
             if ans == self.empty:
                 print('Нашелся! ', ip)
-
                 self.change_inform('check-circle-outline', 'green', ip)
-                return ip
+                await self.connect_scaner(ip, self.port)
+                with open('params.json', 'r') as params:
+                    data = json.load(params)
+                with open('params.json', 'w') as params:
+                    data["ip_scaner"] = ip
+                    print(data)
+                    json.dump(data, params, indent=2)
+                self.app.scaner_status = CONNECT
+                break
+
             await asyncio.sleep(0.1)
         return None
 
@@ -97,9 +104,15 @@ class Scaner:
         return ans
 
     def change_inform(self, icon, color, data):
+        self.ip = data
         self.app.screen.screens[0].ids.icon_button_scan.icon = icon
         self.app.screen.screens[0].ids.icon_button_scan.text_color = color
         self.app.screen.screens[0].ids.ip_label.text = data
+        try:
+            self.app.conf_dialog.content_cls.text_field_ip.hint_text = data
+        except AttributeError:
+            pass
+
 
 
 

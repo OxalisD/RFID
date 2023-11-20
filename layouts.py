@@ -3,10 +3,13 @@ from kivy.uix.boxlayout import BoxLayout
 from kivymd.uix.button import MDRaisedButton, MDRoundFlatIconButton, MDFillRoundFlatIconButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.textfield import MDTextField
+from kivymd.uix.textfield import MDTextField, MDTextFieldRect
 
 import config
 import inventoryapp
+import asyncio
+
+import scaner
 
 
 class MyCheckBox(MDCheckbox):
@@ -49,29 +52,63 @@ class ItemCheck(BoxLayout):
         self.add_widget(self.label)
         self.add_widget(self.check_box)
 
-
-class DialogContentUniversy(BoxLayout):
+class Dialog(BoxLayout):
     orientation = 'vertical'
     spacing = 20
     height = 400
     padding = [50, 50, 50, 50]
+    fill_color = ColorProperty([0, 0, 0, 50])
 
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
         self.app = app
 
-        fill_color = ColorProperty([0, 0, 0, 50])
+
+
+class DialogScanerAndDBParams(Dialog):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.text_field_ip = MDTextFieldRect(hint_text=self.app.scaner.ip,
+                                             font_size=20,
+                                             size_hint=(1, None),
+                                             height=40)
+        self.text_field_ip.fill_color = self.fill_color
+
+        self.button_file_test = MDFillRoundFlatIconButton(text='Тест',
+                                                          font_size=20,
+                                                          icon='dots-vertical',
+                                                          pos_hint={'center_x': .5, 'center_y': .5},
+                                                          on_release=lambda x: self.app.menu.open())
+
+        self.button_file_search = MDFillRoundFlatIconButton(text='Поиск',
+                                                            font_size=20,
+                                                            icon='dots-vertical',
+                                                            pos_hint={'center_x': .5, 'center_y': .5},
+                                                            on_release=lambda x: asyncio.create_task(self.app.scaner.search_scaner()))
+
+        self.add_widget(self.text_field_ip)
+        self.add_widget(self.button_file_test)
+        self.add_widget(self.button_file_search)
+
+
+
+
+class DialogContentUniversy(Dialog):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
         self.text_field_file_save = MDTextField(hint_text=self.app.dict_file_result,
                                            helper_text='Папка для сохранения',
                                            helper_text_mode='persistent',
                                            mode='fill')
-        self.text_field_file_save.fill_color = fill_color
+        self.text_field_file_save.fill_color = self.fill_color
 
         self.text_field_file_search = MDTextField(hint_text=self.app.dict_file_search,
                                                 helper_text='Папка для поиска',
                                                 helper_text_mode='persistent',
                                                 mode='fill')
-        self.text_field_file_search.fill_color = fill_color
+        self.text_field_file_search.fill_color = self.fill_color
 
         self.button_file = MDRoundFlatIconButton(text='Выбрать',
                                                  icon='folder',

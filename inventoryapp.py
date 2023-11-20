@@ -17,7 +17,7 @@ import config
 import scaner
 from scaner import Scaner
 from report import Report
-from layouts import DialogContentUniversy
+from layouts import DialogContentUniversy, DialogScanerAndDBParams
 from db_lib import DBLib
 import datetime
 import asyncio
@@ -253,6 +253,7 @@ class InventoryApp(MDApp):
 
     def close_dialog(self, instance):
         print('Нажата кнопка: Отмена')
+        self.scaner.search = False
         self.conf_dialog.dismiss()
         self.conf_dialog = None
 
@@ -286,7 +287,27 @@ class InventoryApp(MDApp):
                 title=title,
                 type='custom',
                 size_hint_x=0.8,
-                content_cls=DialogContentUniversy(self),
+                content_cls=DialogContentUniversy(app=self),
+                buttons=[MDRectangleFlatIconButton(text='Отмена',
+                                                   text_color=self.theme_cls.primary_color,
+                                                   icon='cancel',
+                                                   on_release=self.close_dialog),
+                         MDRectangleFlatIconButton(text='Старт',
+                                                   text_color=self.theme_cls.primary_color,
+                                                   icon='download',
+                                                   on_release=lambda x: self.ok_dialog())])
+        self.conf_dialog.open()
+
+    def show_params_dialog(self, mode: str):
+        """Диалоговое окно настроек сканера"""
+        self.mode = mode
+        title = f'Настройте параметры сканера:'
+        if not self.conf_dialog:
+            self.conf_dialog = MDDialog(
+                title=title,
+                type='custom',
+                size_hint_x=0.8,
+                content_cls=DialogScanerAndDBParams(app=self),
                 buttons=[MDRectangleFlatIconButton(text='Отмена',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='cancel',
