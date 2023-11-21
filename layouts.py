@@ -12,7 +12,7 @@ import asyncio
 
 import scaner
 
-
+GREY = [0, 0, 0, 50]
 class MyCheckBox(MDCheckbox):
     numb = 0
     app = None
@@ -36,6 +36,7 @@ class MyCheckBox(MDCheckbox):
             elif self.numb == 5:
                 self.app.param = 5
 
+
 class ItemCheck(BoxLayout):
     orientation = 'horizontal'
 
@@ -53,16 +54,11 @@ class ItemCheck(BoxLayout):
         self.add_widget(self.label)
         self.add_widget(self.check_box)
 
-class MyTextField(MDTextFieldRect):
-    font_size = 20
-    size_hint = (1, None)
-    height = 40
-    #fill_color = 'grey'
-
 
 class MyButton(MDFillRoundFlatIconButton):
     font_size = 20
     pos_hint = {'center_x': .5, 'center_y': .5}
+
 
 class Dialog(BoxLayout):
     orientation = 'vertical'
@@ -80,8 +76,15 @@ class DialogScanerAndDBParams(Dialog):
         super().__init__(**kwargs)
 
         self.status_label = MDLabel(text='')
-        self.text_field_ip = MyTextField()
-        self.text_field_port = MDTextFieldRect(hint_text=str(self.app.scaner.port))
+        self.text_field_ip = MDTextFieldRect(hint_text=str(self.app.scaner.ip),
+                                             font_size=20,
+                                             size_hint=(1, None),
+                                             height=40)
+        # Поле для указания порта. Потом добавлю
+        # self.text_field_port = MDTextFieldRect(hint_text=str(self.app.scaner.port),
+        #                                        font_size=20,
+        #                                        size_hint=(1, None),
+        #                                        height=40)
 
         self.button_file_test = MyButton(text='Тест соединения',
                                          icon='connection',
@@ -96,6 +99,9 @@ class DialogScanerAndDBParams(Dialog):
         self.add_widget(self.button_file_search)
         print("status scaner", self.app.scaner_status)
         self.update_data()
+
+    def __str__(self):
+        return "DialogScaner"
 
     def update_data(self):
         self.text_field_ip.hint_text = self.app.scaner.ip
@@ -126,13 +132,13 @@ class DialogContentUniversy(Dialog):
                                            helper_text='Папка для сохранения',
                                            helper_text_mode='persistent',
                                            mode='fill')
-        self.text_field_file_save.fill_color = MyTextField.fill_color
+        self.text_field_file_save.fill_color = GREY
 
         self.text_field_file_search = MDTextField(hint_text=self.app.dict_file_search,
                                                 helper_text='Папка для поиска',
                                                 helper_text_mode='persistent',
                                                 mode='fill')
-        self.text_field_file_search.fill_color = MyTextField.fill_color
+        self.text_field_file_search.fill_color = GREY
 
         self.button_file = MDRoundFlatIconButton(text='Выбрать',
                                                  icon='folder',
@@ -167,6 +173,9 @@ class DialogContentUniversy(Dialog):
         elif self.app.mode == inventoryapp.STRANGERS:
             self.add_widget(self.text_field_file_save)
             self.add_widget(self.button_file)
+
+    def __str__(self):
+        return "DialogContentUniversy"
 
     def add_date(self):
         self.button_date = MyButton(text=self.app.date_inv.strftime('%d. %m. %Y'),

@@ -312,10 +312,11 @@ class InventoryApp(MDApp):
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='cancel',
                                                    on_release=self.close_dialog),
-                         MDRectangleFlatIconButton(text='Старт',
+                         MDRectangleFlatIconButton(text='Принять',
                                                    text_color=self.theme_cls.primary_color,
-                                                   icon='download',
-                                                   on_release=lambda x: self.ok_dialog())])
+                                                   icon='check-circle-outline',
+                                                   on_release=lambda x: self.scaner.test_connect(
+                                                       self.conf_dialog.content_cls.text_field_ip.text))])
         self.conf_dialog.open()
 
 

@@ -34,7 +34,7 @@ class Scaner:
                     print(data['ip_scaner'])
                     self.ip = data['ip_scaner']
                     self.port = data['port']
-                    ans = await self.connect(data["ip_scaner"], data["port"])
+                    ans = self.connect(data["ip_scaner"], data["port"])
                     if ans == self.empty:
                         await self.connect_scaner(data["ip_scaner"], data["port"])
                         self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
@@ -59,7 +59,7 @@ class Scaner:
             if not self.search:
                 break
             ip = '.'.join(list_ip[:3]) + '.' + str(i)
-            ans = await (self.connect(ip, self.port))
+            ans = (self.connect(ip, self.port))
             if ans == self.empty:
                 print('Нашелся! ', ip)
 
@@ -70,7 +70,7 @@ class Scaner:
 
 
 
-    async def connect(self, ip, port):
+    def connect(self, ip, port):
         print(ip)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(0.2)
@@ -116,18 +116,21 @@ class Scaner:
         self.app.screen.screens[0].ids.icon_button_scan.icon = icon
         self.app.screen.screens[0].ids.icon_button_scan.text_color = color
         self.app.screen.screens[0].ids.ip_label.text = data
-        print(self.app.conf_dialog)
-        if self.app.conf_dialog.content_cls.update_data:
-            self.app.conf_dialog.content_cls.update_data()
+
+        if self.app.conf_dialog:
+            if self.app.conf_dialog.content_cls.__str__() == "DialogScaner":
+                print("Объект ", self.app.conf_dialog.content_cls)
+                self.app.conf_dialog.content_cls.update_data()
 
 
 
     def test_connect(self, ip):
         ans = self.connect(ip, self.port)
         if ans == self.empty:
+            toast(ip, " Найден!")
             self.connect_scaner(ip, self.port)
         else:
-            toast(ip, " Не отвечает")
+            toast(ip, " Не отвечает...")
 
 
 
