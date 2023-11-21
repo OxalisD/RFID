@@ -4,6 +4,8 @@ import json
 
 from kivymd.toast import toast
 
+import config
+
 SEARCH = 'search'
 CONNECT = 'connect'
 DISCONNECT = 'disconnect'
@@ -13,6 +15,7 @@ class Scaner:
     UTF = 'UTF-8'
     request = b'\x05\x07\xff\xf0\x01\x00\x6a\x50'
     empty = b'\x05\x07\x01\xf0\x01\x00\x03\x89'
+    find = 'E004'
 
     def __init__(self, app):
         self.app = app
@@ -24,6 +27,8 @@ class Scaner:
         self.writer = None
         self.reader = None
         self.search = False
+        self.rfid_set = set()
+        self.rfid_list = []
 
     async def get_connect(self):
         if self.search == False:
@@ -69,7 +74,6 @@ class Scaner:
         return None
 
 
-
     def connect(self, ip, port):
         print(ip)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -104,7 +108,6 @@ class Scaner:
         return ans
 
     async def send_to_scaner(self):
-        print('send')
         self.writer.write(self.request)
         await self.writer.drain()
 
@@ -123,7 +126,6 @@ class Scaner:
                 self.app.conf_dialog.content_cls.update_data()
 
 
-
     def test_connect(self, ip):
         ans = self.connect(ip, self.port)
         if ans == self.empty:
@@ -131,6 +133,42 @@ class Scaner:
             self.connect_scaner(ip, self.port)
         else:
             toast(ip, " Не отвечает...")
+
+    async def work_scaner(self, param):
+        i = 0
+        if param == 6:
+            asyncio.create_task(self.send_rfid())
+        while self.app.inventory:
+            await self.send_to_scaner()
+            ans = await self.get_to_scaner()
+            if self.empty not in ans:
+                ans = reversed([f'{byte:02X}' for byte in ans])
+                rfid = ''.join(ans)
+                index = rfid.find(self.find)
+                rfid = rfid[index:index+16]
+                if len(rfid) == 16 and rfid not in self.rfid_set:
+                    self.rfid_set.add(rfid)
+                    self.rfid_list.append(rfid)
+                    print(rfid)
+                    print(len(self.rfid_set))
+                    i += 1
+                    continue
+            else:
+                i += 1
+            if i > 10:
+                await asyncio.sleep(config.DELAY_SEND_SCANER)
+                i = 0
+
+    async def send_rfid(self):
+        print("rfid_list", not self.rfid_list)
+        i = 0
+        while self.app.inventory:
+            if not self.rfid_list or i > 10:
+                await asyncio.sleep(config.DELAY_SEND_RFID_IN_DB)
+                i = 0
+            else:
+                self.app.data_base.inventory_update(self.rfid_list.pop(0))
+                i += 1
 
 
 

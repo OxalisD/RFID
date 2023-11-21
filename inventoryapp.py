@@ -271,7 +271,11 @@ class InventoryApp(MDApp):
             self.root.screens[1].update_data()
             self.conf_dialog.dismiss()
             self.conf_dialog = None
-            asyncio.create_task(self.data_base.search_file())
+            if self.param == 6 or 8:
+                asyncio.create_task(self.scaner.work_scaner(self.param))
+            elif self.param == 7:
+                asyncio.create_task(self.data_base.search_file())
+
         elif self.mode == STRANGERS:
             report = Report(self.dict_file_result)
             report.report_library(self.strangers)

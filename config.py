@@ -13,3 +13,6 @@ params = {
   "ip_scaner": "10.1.0.50",
   "port": 4800
 }
+#Задержка после 10 пустых ответов от сканера
+DELAY_SEND_SCANER = 0.3
+DELAY_SEND_RFID_IN_DB = 0.1

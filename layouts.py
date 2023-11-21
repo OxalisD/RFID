@@ -25,16 +25,17 @@ class MyCheckBox(MDCheckbox):
     def on_active(self, *args) -> None:
         super().on_active(*args)
         if self.active:
-            if self.numb == 1:
-                self.app.param = 1
-            elif self.numb == 2:
-                self.app.param = 2
-            elif self.numb == 3:
-                self.app.param = 3
-            elif self.numb == 4:
-                self.app.param = 4
-            elif self.numb == 5:
-                self.app.param = 5
+            self.app.param = self.numb
+            # if self.numb == 1:
+            #     self.app.param = 1
+            # elif self.numb == 2:
+            #     self.app.param = 2
+            # elif self.numb == 3:
+            #     self.app.param = 3
+            # elif self.numb == 4:
+            #     self.app.param = 4
+            # elif self.numb == 5:
+            #     self.app.param = 5
 
 
 class ItemCheck(BoxLayout):
@@ -162,8 +163,6 @@ class DialogContentUniversy(Dialog):
             if self.app.report == list(config.REPORTS.keys())[0]:
                 self.add_date()
 
-            self.add_boxs()
-
         elif self.app.mode == inventoryapp.INVENTORY:
             self.add_widget(self.text_field_file_search)
             self.add_widget(self.button_file)
@@ -173,6 +172,8 @@ class DialogContentUniversy(Dialog):
         elif self.app.mode == inventoryapp.STRANGERS:
             self.add_widget(self.text_field_file_save)
             self.add_widget(self.button_file)
+
+        self.add_boxs()
 
     def __str__(self):
         return "DialogContentUniversy"
@@ -188,7 +189,14 @@ class DialogContentUniversy(Dialog):
             self.remove_widget(self.button_date)
 
     def add_boxs(self):
-        if config.REPORTS[self.app.report] == 1:
+        if self.app.mode == inventoryapp.INVENTORY:
+            self.checkbox_6 = ItemCheck('Онлайн - сканер', 6, app=self.app, active=True)
+            self.checkbox_7 = ItemCheck('Онлайн - файл', 7, app=self.app)
+            self.checkbox_8 = ItemCheck('Офлайн - сканер', 8, app=self.app)
+            self.add_widget(self.checkbox_6)
+            self.add_widget(self.checkbox_7)
+            self.add_widget(self.checkbox_8)
+        elif config.REPORTS[self.app.report] == 1:
             self.checkbox_1 = ItemCheck('все книги', 1, app=self.app, active=True)
             self.checkbox_2 = ItemCheck('только проверенные', 2, app=self.app)
             self.checkbox_3 = ItemCheck('только недостача', 3, app=self.app)
@@ -200,6 +208,7 @@ class DialogContentUniversy(Dialog):
             self.checkbox_5 = ItemCheck('включая такие же книги с номерами', 5, app=self.app)
             self.add_widget(self.checkbox_4)
             self.add_widget(self.checkbox_5)
+
 
     def del_boxs(self):
         if config.REPORTS[self.app.report] == 2:
