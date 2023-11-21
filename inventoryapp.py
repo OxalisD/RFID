@@ -172,7 +172,7 @@ class InventoryApp(MDApp):
 
 
     def build(self):
-        self.scaner_status = asyncio.create_task(self.scaner.get_connect())
+        asyncio.create_task(self.scaner.get_connect())
         self.theme_cls.primary_palette = 'DeepPurple'
         return self.screen
 

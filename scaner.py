@@ -2,6 +2,8 @@ import asyncio
 import socket
 import json
 
+from kivymd.toast import toast
+
 SEARCH = 'search'
 CONNECT = 'connect'
 DISCONNECT = 'disconnect'
@@ -24,20 +26,26 @@ class Scaner:
         self.search = False
 
     async def get_connect(self):
-        print('Попытка соединения со сканером...')
-        with open('params.json', 'r') as params:
-            data = json.load(params)
-            if data["ip_scaner"]:
-                print(data['ip_scaner'])
-                self.ip = data['ip_scaner']
-                self.port = data['port']
-                ans = await self.connect(data["ip_scaner"], data["port"])
-                if ans == self.empty:
-                    await self.connect_scaner(data["ip_scaner"], data["port"])
-                    self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
-                    return CONNECT
+        if self.search == False:
+            print('Попытка соединения со сканером...')
+            with open('params.json', 'r') as params:
+                data = json.load(params)
+                if data["ip_scaner"]:
+                    print(data['ip_scaner'])
+                    self.ip = data['ip_scaner']
+                    self.port = data['port']
+                    ans = await self.connect(data["ip_scaner"], data["port"])
+                    if ans == self.empty:
+                        await self.connect_scaner(data["ip_scaner"], data["port"])
+                        self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
+                        self.app.scaner_status = CONNECT
+                        return CONNECT
 
-        self.change_inform('close-circle-outline', 'red', 'не найден')
+        self.change_inform('close-circle-outline', 'red', '')
+        await asyncio.sleep(10)
+        print("Добавление задачи")
+        asyncio.create_task(self.get_connect())
+        self.app.scaner_status = DISCONNECT
         return DISCONNECT
 
 
@@ -54,17 +62,9 @@ class Scaner:
             ans = await (self.connect(ip, self.port))
             if ans == self.empty:
                 print('Нашелся! ', ip)
-                self.change_inform('check-circle-outline', 'green', ip)
-                await self.connect_scaner(ip, self.port)
-                with open('params.json', 'r') as params:
-                    data = json.load(params)
-                with open('params.json', 'w') as params:
-                    data["ip_scaner"] = ip
-                    print(data)
-                    json.dump(data, params, indent=2)
-                self.app.scaner_status = CONNECT
-                break
 
+                await self.connect_scaner(ip, self.port)
+                break
             await asyncio.sleep(0.1)
         return None
 
@@ -84,6 +84,15 @@ class Scaner:
         return ans
 
     async def connect_scaner(self, ip, port):
+        self.change_inform('check-circle-outline', 'green', ip)
+        with open('params.json', 'r') as params:
+            data = json.load(params)
+        if data["ip_scaner"] != ip:
+            with open('params.json', 'w') as params:
+                data["ip_scaner"] = ip
+                print(data)
+                json.dump(data, params, indent=2)
+        self.app.scaner_status = CONNECT
         print(ip)
         try:
             self.reader, self.writer = await asyncio.open_connection(ip, port)
@@ -104,14 +113,23 @@ class Scaner:
         return ans
 
     def change_inform(self, icon, color, data):
-        self.ip = data
         self.app.screen.screens[0].ids.icon_button_scan.icon = icon
         self.app.screen.screens[0].ids.icon_button_scan.text_color = color
         self.app.screen.screens[0].ids.ip_label.text = data
-        try:
-            self.app.conf_dialog.content_cls.text_field_ip.hint_text = data
-        except AttributeError:
-            pass
+        print(self.app.conf_dialog)
+        if self.app.conf_dialog.content_cls.update_data:
+            self.app.conf_dialog.content_cls.update_data()
+
+
+
+    def test_connect(self, ip):
+        ans = self.connect(ip, self.port)
+        if ans == self.empty:
+            self.connect_scaner(ip, self.port)
+        else:
+            toast(ip, " Не отвечает")
+
+
 
 
 
