@@ -30,12 +30,12 @@ class DBLib:
             self.cursor.execute(r.request_book_by_t090f(rfid=rfid))
             book = self.cursor.fetchone()
             if not book:
-                print('Не идентифицирован')
+                #print('Не идентифицирован')
                 self.app.unidentified += 1
             elif config.FILIALS[self.app.item_library] and book[5][:2] != config.FILIALS[self.app.item_library]:
-                print(book[5], ' != ', config.FILIALS[self.app.item_library])
+                #print(book[5], ' != ', config.FILIALS[self.app.item_library])
                 self.app.strangers.append(book)
-                print('Чужая книга: ', book)
+                #print('Чужая книга: ', book)
         except TypeError:
             print('Что-то пошло не так.')
 
@@ -43,7 +43,7 @@ class DBLib:
     @conn_manager
     def get_count_book_in_filial(self, library=None, date=None):
         self.cursor.execute(r.request_count_book(library, date))
-        print(r.request_count_book(library, date))
+        #print(r.request_count_book(library, date))
         return self.cursor.fetchone()[0]
 
     #Отчет по инвентаризации

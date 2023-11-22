@@ -99,6 +99,7 @@ class InventoryScreen(MDScreen):
         self.ids['item_inv_unidentified'] = self.item_inv_unidentified
 
     def exit(self):
+        self.app.strangers = []
         self.app.inventory = False
         self.app.root.current = 'first_screen'
 
@@ -109,7 +110,11 @@ class InventoryScreen(MDScreen):
         print(date)
         today = datetime.date.today()
 
-        all = self.app.data_base.get_count_book_in_filial(library=library)
+        if not self.ids.item_all.label_digit.text:
+            all = self.app.data_base.get_count_book_in_filial(library=library)
+            self.ids.item_all.label_digit.text = str(all)
+        else:
+            all = int(self.ids.item_all.label_digit.text)
         all_inv = self.app.data_base.get_count_book_in_filial(library=library, date=date)
         today_inv = self.app.data_base.get_count_book_in_filial(library=library, date=today)
 
@@ -119,12 +124,13 @@ class InventoryScreen(MDScreen):
 
         unidentified = self.app.unidentified
         print(today_inv)
-        self.ids.item_all.label_digit.text = str(all)
+
         self.ids.item_inv_all.label_digit.text = str(all_inv)
         self.ids.item_inv_today.label_digit.text = str(today_inv)
         self.ids.item_inv_not.label_digit.text = str(all - all_inv)
         self.ids.item_inv_strangers.label_digit.text = str(strangers)
         self.ids.item_inv_unidentified.label_digit.text = str(unidentified)
+
 
 
 class WindowsManager(MDScreenManager):
@@ -271,8 +277,16 @@ class InventoryApp(MDApp):
             self.root.screens[1].update_data()
             self.conf_dialog.dismiss()
             self.conf_dialog = None
-            if self.param == 6 or 8:
-                asyncio.create_task(self.scaner.work_scaner(self.param))
+            if self.param == 6 or self.param == 8:
+                file = None
+                if self.param == 8:
+                    file = Report(self.dict_file_search,INVENTORY,
+                                  self.item_library,0,
+                                  datetime.date.today())
+
+                print("Yes!")
+                print(self.param)
+                asyncio.create_task(self.scaner.work_scaner(self.param, file))
             elif self.param == 7:
                 asyncio.create_task(self.data_base.search_file())
 

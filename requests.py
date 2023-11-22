@@ -3,7 +3,6 @@ import datetime
 
 
 def filter_library_and_date_and_rfid(library=None, date=None, rfid=None, over=True):
-    print('filter ', over)
     if date:
         date = date.strftime('%Y-%m-%d')
     filter = ''

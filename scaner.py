@@ -31,27 +31,31 @@ class Scaner:
         self.rfid_list = []
 
     async def get_connect(self):
-        if self.search == False:
-            print('Попытка соединения со сканером...')
-            with open('params.json', 'r') as params:
-                data = json.load(params)
-                if data["ip_scaner"]:
-                    print(data['ip_scaner'])
-                    self.ip = data['ip_scaner']
-                    self.port = data['port']
-                    ans = self.connect(data["ip_scaner"], data["port"])
-                    if ans == self.empty:
-                        await self.connect_scaner(data["ip_scaner"], data["port"])
-                        self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
-                        self.app.scaner_status = CONNECT
-                        return CONNECT
+        if self.app.inventory == False:
+            await asyncio.sleep(1)
+            if self.search == False :
+                print('Попытка соединения со сканером...')
+                with open('params.json', 'r') as params:
+                    data = json.load(params)
+                    if data["ip_scaner"]:
+                        print(data['ip_scaner'])
+                        self.ip = data['ip_scaner']
+                        self.port = data['port']
+                        ans = self.connect(data["ip_scaner"], data["port"])
+                        if ans == self.empty:
+                            if self.app.scaner_status != CONNECT:
+                                await self.connect_scaner(data["ip_scaner"], data["port"])
+                                self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
+                                self.app.scaner_status = CONNECT
 
-        self.change_inform('close-circle-outline', 'red', '')
-        await asyncio.sleep(10)
-        print("Добавление задачи")
+                        else:
+                            if self.app.scaner_status == CONNECT:
+                                toast("Сканер недоступен!")
+                            self.change_inform('close-circle-outline', 'red', '')
+                            self.app.scaner_status = DISCONNECT
+
+        await asyncio.sleep(9)
         asyncio.create_task(self.get_connect())
-        self.app.scaner_status = DISCONNECT
-        return DISCONNECT
 
 
     async def search_scaner(self):
@@ -88,6 +92,7 @@ class Scaner:
         return ans
 
     async def connect_scaner(self, ip, port):
+        print('connect_scaner', ip)
         self.change_inform('check-circle-outline', 'green', ip)
         with open('params.json', 'r') as params:
             data = json.load(params)
@@ -97,7 +102,7 @@ class Scaner:
                 print(data)
                 json.dump(data, params, indent=2)
         self.app.scaner_status = CONNECT
-        print(ip)
+        print("ip: ", ip)
         try:
             self.reader, self.writer = await asyncio.open_connection(ip, port)
         except TimeoutError:
@@ -125,19 +130,20 @@ class Scaner:
                 print("Объект ", self.app.conf_dialog.content_cls)
                 self.app.conf_dialog.content_cls.update_data()
 
-
     def test_connect(self, ip):
         ans = self.connect(ip, self.port)
         if ans == self.empty:
+            print(ip, " Найден!")
             toast(ip, " Найден!")
             self.connect_scaner(ip, self.port)
         else:
             toast(ip, " Не отвечает...")
 
-    async def work_scaner(self, param):
+    async def work_scaner(self, param, file=None):
         i = 0
         if param == 6:
             asyncio.create_task(self.send_rfid())
+
         while self.app.inventory:
             await self.send_to_scaner()
             ans = await self.get_to_scaner()
@@ -155,20 +161,34 @@ class Scaner:
                     continue
             else:
                 i += 1
-            if i > 10:
+            if i > config.COUNT_EMPTY_ANSWER:
+                if param == 8:
+                    await self.load_to_file(file)
                 await asyncio.sleep(config.DELAY_SEND_SCANER)
                 i = 0
 
     async def send_rfid(self):
-        print("rfid_list", not self.rfid_list)
+        print(self.rfid_list)
         i = 0
-        while self.app.inventory:
-            if not self.rfid_list or i > 10:
+        while self.app.inventory or self.rfid_list:
+            if not self.rfid_list or i > config.COUNT_RFID_TO_BD:
                 await asyncio.sleep(config.DELAY_SEND_RFID_IN_DB)
-                i = 0
+                if i > 0:
+                    self.app.root.screens[1].update_data()
+                    i = 0
             else:
                 self.app.data_base.inventory_update(self.rfid_list.pop(0))
                 i += 1
+
+        self.rfid_set = set()
+
+    async def load_to_file(self, file):
+        print(file)
+        with open(file, 'a') as f:
+            for rfid in self.rfid_list:
+                f.write(rfid)
+
+
 
 
 
