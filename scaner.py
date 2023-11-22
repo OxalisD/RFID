@@ -33,6 +33,7 @@ class Scaner:
     async def get_connect(self):
         if self.app.inventory == False:
             await asyncio.sleep(1)
+            sec = 3
             if self.search == False :
                 print('Попытка соединения со сканером...')
                 with open('params.json', 'r') as params:
@@ -47,6 +48,7 @@ class Scaner:
                                 await self.connect_scaner(data["ip_scaner"], data["port"])
                                 self.change_inform('check-circle-outline', 'green', data['ip_scaner'])
                                 self.app.scaner_status = CONNECT
+                                sec = 10
 
                         else:
                             if self.app.scaner_status == CONNECT:
@@ -54,17 +56,16 @@ class Scaner:
                             self.change_inform('close-circle-outline', 'red', '')
                             self.app.scaner_status = DISCONNECT
 
-        await asyncio.sleep(9)
+        await asyncio.sleep(sec)
         asyncio.create_task(self.get_connect())
 
 
     async def search_scaner(self):
         print('Пошел поиск...')
         #self.change_inform('sync-circle', 'blue', 'поиск')
-        self.search = True
 
         list_ip = self.main_ip.split('.')
-        for i in range(200, 254):
+        for i in range(0, 254):
             if not self.search:
                 break
             ip = '.'.join(list_ip[:3]) + '.' + str(i)
@@ -81,7 +82,7 @@ class Scaner:
     def connect(self, ip, port):
         print(ip)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(0.2)
+        self.socket.settimeout(config.TIMEOUT)
         try:
             self.socket.connect((ip, port))
             self.socket.send(self.request)
@@ -134,10 +135,10 @@ class Scaner:
         ans = self.connect(ip, self.port)
         if ans == self.empty:
             print(ip, " Найден!")
-            toast(ip, " Найден!")
-            self.connect_scaner(ip, self.port)
+            toast(f"{ip} Найден!")
+            asyncio.create_task(self.connect_scaner(ip, self.port))
         else:
-            toast(ip, " Не отвечает...")
+            toast(f"{ip} Не отвечает...")
 
     async def work_scaner(self, param, file=None):
         i = 0
@@ -183,7 +184,7 @@ class Scaner:
         self.rfid_set = set()
 
     async def load_to_file(self, file):
-        print(file)
+        print("file", file)
         with open(file, 'a') as f:
             for rfid in self.rfid_list:
                 f.write(rfid)

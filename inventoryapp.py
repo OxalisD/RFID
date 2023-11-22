@@ -257,8 +257,12 @@ class InventoryApp(MDApp):
         self.manager_open = False
         self.file_manager.close()
 
-    def close_dialog(self, instance):
+    def close_dialog(self, instance, ip=None):
         print('Нажата кнопка: Отмена')
+        print("instance ", ip, "ip ", self.scaner.ip)
+        if ip:
+            if self.scaner.ip != ip:
+                self.conf_dialog.content_cls.test_ip()
         self.scaner.search = False
         self.conf_dialog.dismiss()
         self.conf_dialog = None
@@ -281,8 +285,8 @@ class InventoryApp(MDApp):
                 file = None
                 if self.param == 8:
                     file = Report(self.dict_file_search,INVENTORY,
-                                  self.item_library,0,
-                                  datetime.date.today())
+                                  self.item_library, 0,
+                                  datetime.date.today()).file
 
                 print("Yes!")
                 print(self.param)
@@ -318,6 +322,7 @@ class InventoryApp(MDApp):
 
     def show_params_dialog(self, mode: str):
         """Диалоговое окно настроек сканера"""
+        self.scaner.search = True
         self.mode = mode
         title = f'Настройте параметры сканера:'
         if not self.conf_dialog:
@@ -329,14 +334,13 @@ class InventoryApp(MDApp):
                 buttons=[MDRectangleFlatIconButton(text='Отмена',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='cancel',
-                                                   on_release=self.close_dialog),
+                                                   on_release=lambda x: self.close_dialog()),
                          MDRectangleFlatIconButton(text='Принять',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='check-circle-outline',
-                                                   on_release=lambda x: self.scaner.test_connect(
-                                                       self.conf_dialog.content_cls.text_field_ip.text))])
+                                                   on_release=lambda x: self.close_dialog(
+                                                       ip=self.conf_dialog.content_cls.text_field_ip.text))])
         self.conf_dialog.open()
-
 
 
     # def filling_inv_screen(self):

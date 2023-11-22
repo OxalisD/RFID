@@ -96,7 +96,7 @@ class DialogScanerAndDBParams(Dialog):
 
         self.button_file_test = MyButton(text='Тест соединения',
                                          icon='connection',
-                                         on_release=lambda x: asyncio.create_task(self.test_ip()))
+                                         on_release=lambda x: self.test_ip())
 
         self.button_file_search = MyButton(text='Поиск сканера',
                                            icon='nfc-search-variant',
@@ -118,7 +118,7 @@ class DialogScanerAndDBParams(Dialog):
         elif self.app.scaner_status == scaner.DISCONNECT:
             self.status_label.text = "Соединение разорвано"
 
-    async def test_ip(self):
+    def test_ip(self):
         print("Пошел тест")
         test_list = self.text_field_ip.text.split(".")
         if len(test_list) != 4 or not "".join(test_list).isdigit():
