@@ -31,9 +31,9 @@ class Scaner:
         self.rfid_list = []
 
     async def get_connect(self):
+        sec = 3
         if self.app.inventory == False:
             await asyncio.sleep(1)
-            sec = 3
             if self.search == False :
                 print('Попытка соединения со сканером...')
                 with open('params.json', 'r') as params:
@@ -141,9 +141,12 @@ class Scaner:
             toast(f"{ip} Не отвечает...")
 
     async def work_scaner(self, param, file=None):
+        print('work_scaner')
         i = 0
         if param == 6:
             asyncio.create_task(self.send_rfid())
+        elif param == 8:
+            asyncio.create_task(self.load_to_file(file))
 
         while self.app.inventory:
             await self.send_to_scaner()
@@ -163,8 +166,6 @@ class Scaner:
             else:
                 i += 1
             if i > config.COUNT_EMPTY_ANSWER:
-                if param == 8:
-                    await self.load_to_file(file)
                 await asyncio.sleep(config.DELAY_SEND_SCANER)
                 i = 0
 
@@ -184,10 +185,15 @@ class Scaner:
         self.rfid_set = set()
 
     async def load_to_file(self, file):
-        print("file", file)
-        with open(file, 'a') as f:
-            for rfid in self.rfid_list:
-                f.write(rfid)
+        print('load_to_file')
+        while self.app.inventory or self.rfid_list:
+            if self.rfid_list:
+                print("file", file)
+                with open(file, 'a') as f:
+                    for rfid in self.rfid_list:
+                        f.write(rfid + '\n')
+                self.rfid_list = []
+            await asyncio.sleep(0)
 
 
 

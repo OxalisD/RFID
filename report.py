@@ -18,8 +18,13 @@ class Report:
     def make_file_result(file, report, lib, param, date=None):
         if not date:
             date = datetime.date.today().strftime('%Y-%m-%d')
-        param = config.PARAMETERS[param - 1]
-        name = f'/{date}_{lib}_{report}_{param}.xlsx'
+        if param > 5:
+            param = ''
+            format = 'txt'
+        else:
+            param = config.PARAMETERS[param - 1]
+            format = 'xlsx'
+        name = f'/{date}_{lib}_{report}_{param}.{format}'
         if len(file) > 2:
             return file + name
         else:

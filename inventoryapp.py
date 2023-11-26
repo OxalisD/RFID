@@ -144,7 +144,6 @@ class InventoryApp(MDApp):
         self.data_base = DBLib(self)
 
         self.item_library = list(config.FILIALS.keys())[0]
-        #self.date_last_inv = self.data_base.get_last_date_inv()[0]
         self.date_inv = self.data_base.get_last_date_inv()[0]
         self.report = list(config.REPORTS.keys())[0]
         self.mode = 'inventory'
@@ -156,7 +155,6 @@ class InventoryApp(MDApp):
         self.conf_dialog = None
         self.scaner = Scaner(self)
         self.scaner_status = scaner.DISCONNECT
-        #self.index = '1'
         self.inventory = False
         self.strangers = []
         self.unidentified = 0
@@ -284,8 +282,8 @@ class InventoryApp(MDApp):
             if self.param == 6 or self.param == 8:
                 file = None
                 if self.param == 8:
-                    file = Report(self.dict_file_search,INVENTORY,
-                                  self.item_library, 0,
+                    file = Report(self.dict_file_search, INVENTORY,
+                                  self.item_library, 8,
                                   datetime.date.today()).file
 
                 print("Yes!")
@@ -334,7 +332,7 @@ class InventoryApp(MDApp):
                 buttons=[MDRectangleFlatIconButton(text='Отмена',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='cancel',
-                                                   on_release=lambda x: self.close_dialog()),
+                                                   on_release=lambda x: self.close_dialog(self)),
                          MDRectangleFlatIconButton(text='Принять',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='check-circle-outline',

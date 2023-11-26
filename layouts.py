@@ -26,27 +26,13 @@ class MyCheckBox(MDCheckbox):
         super().on_active(*args)
         if self.active:
             print(self.numb)
-            #self.app.param = self.numb
-            if self.numb == 1:
-                self.app.param = 1
-            elif self.numb == 2:
-                self.app.param = 2
-            elif self.numb == 3:
-                self.app.param = 3
-            elif self.numb == 4:
-                self.app.param = 4
-            elif self.numb == 5:
-                self.app.param = 5
-            elif self.numb == 6:
-                self.app.param = 6
-            elif self.numb == 7:
-                self.app.param = 7
-            elif self.numb == 8:
-                self.app.param = 8
+            if self.numb:
+                self.app.param = self.numb
 
 
 class ItemCheck(BoxLayout):
     orientation = 'horizontal'
+
 
     def __init__(self, text, numb, app, active=False, **kwargs):
         super().__init__(**kwargs)
