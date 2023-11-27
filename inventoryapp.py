@@ -1,6 +1,8 @@
 from kivy.lang import Builder
+from kivy.uix.label import Label
 from kivymd.app import MDApp
 from kivymd.toast import toast
+from kivymd.uix.anchorlayout import MDAnchorLayout
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDRectangleFlatIconButton, MDRaisedButton, MDFloatingActionButton
 from kivymd.uix.gridlayout import MDGridLayout
@@ -46,6 +48,41 @@ class ButtonSaveExcel(MDFloatingActionButton):
 
 class FirstScreen(MDScreen):
     pass
+
+
+class OfflineScreen(MDScreen):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        anchor = MDAnchorLayout(md_bg_color='orange',)
+        general_box = MDGridLayout(rows=2,
+                                   cols=1,
+                                   padding=[50, 50, 50, 50],
+                                   pos_hint={'center_x': .5, 'center_y': .5},
+                                   adaptive_width=True,
+                                   )
+
+        self.label_len = Label(text='0',
+                               font_size='100dp',
+                               halign='center',
+                               pos_hint={'center_x': .5, 'center_y': .5},)
+
+        button_end = MDRaisedButton(text='Закончить',
+                                    font_size=20,
+                                    size=(50, 20),
+                                    pos_hint={'center_x': .5, 'center_y': .2},
+                                    on_release=lambda x: self.exit(),
+                                    )
+
+        general_box.add_widget(self.label_len)
+        general_box.add_widget(button_end)
+        anchor.add_widget(general_box)
+        self.add_widget(anchor)
+
+    def update_data(self, count):
+        self.label_len.text = str(count)
+
+
 
 
 class InventoryScreen(MDScreen):
@@ -275,10 +312,7 @@ class InventoryApp(MDApp):
                 self.data_base.get_empty_inv()
         elif self.mode == INVENTORY:
             self.inventory = True
-            self.root.current = 'inventory_screen'
-            self.root.screens[1].update_data()
-            self.conf_dialog.dismiss()
-            self.conf_dialog = None
+
             if self.param == 6 or self.param == 8:
                 file = None
                 if self.param == 8:
@@ -286,11 +320,18 @@ class InventoryApp(MDApp):
                                   self.item_library, 8,
                                   datetime.date.today()).file
 
-                print("Yes!")
                 print(self.param)
                 asyncio.create_task(self.scaner.work_scaner(self.param, file))
             elif self.param == 7:
                 asyncio.create_task(self.data_base.search_file())
+
+            if self.param == 8:
+                self.root.current = 'offline_screen'
+            else:
+                self.root.current = 'inventory_screen'
+                self.root.screens[1].update_data()
+            self.conf_dialog.dismiss()
+            self.conf_dialog = None
 
         elif self.mode == STRANGERS:
             report = Report(self.dict_file_result)
@@ -311,7 +352,7 @@ class InventoryApp(MDApp):
                 buttons=[MDRectangleFlatIconButton(text='Отмена',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='cancel',
-                                                   on_release=self.close_dialog),
+                                                   on_release=lambda x: self.close_dialog(self)),
                          MDRectangleFlatIconButton(text='Старт',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='download',
@@ -336,11 +377,8 @@ class InventoryApp(MDApp):
                          MDRectangleFlatIconButton(text='Принять',
                                                    text_color=self.theme_cls.primary_color,
                                                    icon='check-circle-outline',
-                                                   on_release=lambda x: self.close_dialog(
+                                                   on_release=lambda x: self.close_dialog(instance=self,
                                                        ip=self.conf_dialog.content_cls.text_field_ip.text))])
         self.conf_dialog.open()
 
 
-    # def filling_inv_screen(self):
-    #     item_inv_all = ItemInventory(text='Инвентаризированно: ')
-    #     self.root.screens[1].ids.widget.add_widget(item_inv_all)

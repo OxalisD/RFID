@@ -166,6 +166,8 @@ class Scaner:
             else:
                 i += 1
             if i > config.COUNT_EMPTY_ANSWER:
+                if param == 8:
+                    self.app.root.screens[2].update_data(len(self.rfid_set))
                 await asyncio.sleep(config.DELAY_SEND_SCANER)
                 i = 0
 
