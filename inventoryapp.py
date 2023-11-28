@@ -23,7 +23,6 @@ from layouts import DialogContentUniversy, DialogScanerAndDBParams
 from db_lib import DBLib
 import datetime
 import asyncio
-import os
 
 INVENTORY = 'inventory'
 REPORT = 'report'
@@ -51,9 +50,12 @@ class FirstScreen(MDScreen):
 
 
 class OfflineScreen(MDScreen):
+    app = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+
         anchor = MDAnchorLayout(md_bg_color='orange',)
         general_box = MDGridLayout(rows=2,
                                    cols=1,
@@ -82,13 +84,14 @@ class OfflineScreen(MDScreen):
     def update_data(self, count):
         self.label_len.text = str(count)
 
-
+    def exit(self):
+        self.app.inventory = False
+        self.app.root.current = 'first_screen'
 
 
 class InventoryScreen(MDScreen):
     app = None
     library = ''
-
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -210,6 +213,7 @@ class InventoryApp(MDApp):
                                           preview=True)
 
         InventoryScreen.app = self
+        OfflineScreen.app = self
 
 
     def build(self):

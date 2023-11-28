@@ -62,7 +62,6 @@ class Scaner:
 
     async def search_scaner(self):
         print('Пошел поиск...')
-        #self.change_inform('sync-circle', 'blue', 'поиск')
 
         list_ip = self.main_ip.split('.')
         for i in range(0, 254):
