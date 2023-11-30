@@ -139,13 +139,16 @@ class InventoryScreen(MDScreen):
         self.ids['item_inv_unidentified'] = self.item_inv_unidentified
 
     def exit(self):
+        self.ids.item_all.label_digit.text = ''
         self.app.strangers = []
         self.app.inventory = False
         self.app.root.current = 'first_screen'
 
     def update_data(self):
+        print("update_data")
         self.library = self.app.item_library
         library = self.app.item_library
+        print(self.app.item_library)
         date = self.app.date_inv
         print(date)
         today = datetime.date.today()
@@ -159,7 +162,8 @@ class InventoryScreen(MDScreen):
         today_inv = self.app.data_base.get_count_book_in_filial(library=library, date=today)
 
         strangers = len(self.app.strangers)
-        if strangers > 0:
+
+        if strangers > 0 and 'button_save_strangers' in dir(self.ids.item_inv_strangers):
             self.ids.item_inv_strangers.add_widget(self.button_save_strangers)
 
         unidentified = self.app.unidentified
