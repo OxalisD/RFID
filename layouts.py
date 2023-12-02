@@ -124,7 +124,7 @@ class DialogScanerAndDBParams(Dialog):
 class DialogContentUniversy(Dialog):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
+        print(self.app.mode)
         self.text_field_file_save = MDTextField(hint_text=self.app.dict_file_result,
                                            helper_text='Папка для сохранения',
                                            helper_text_mode='persistent',
@@ -186,7 +186,9 @@ class DialogContentUniversy(Dialog):
             self.remove_widget(self.button_date)
 
     def add_boxs(self):
-        if self.app.mode == inventoryapp.INVENTORY:
+        if self.app.mode == inventoryapp.STRANGERS:
+            pass
+        elif self.app.mode == inventoryapp.INVENTORY:
             self.checkbox_6 = ItemCheck('Онлайн - сканер', 6, app=self.app, active=True)
             self.checkbox_7 = ItemCheck('Онлайн - файл', 7, app=self.app)
             self.checkbox_8 = ItemCheck('Офлайн - сканер', 8, app=self.app)

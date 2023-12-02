@@ -163,7 +163,7 @@ class InventoryScreen(MDScreen):
 
         strangers = len(self.app.strangers)
 
-        if strangers > 0 and 'button_save_strangers' in dir(self.ids.item_inv_strangers):
+        if strangers > 0 and 'button_save_strangers' not in dir(self.ids.item_inv_strangers):
             self.ids.item_inv_strangers.add_widget(self.button_save_strangers)
 
         unidentified = self.app.unidentified
@@ -301,8 +301,6 @@ class InventoryApp(MDApp):
         self.file_manager.close()
 
     def close_dialog(self, instance, ip=None):
-        print('Нажата кнопка: Отмена')
-        print("instance ", ip, "ip ", self.scaner.ip)
         if ip:
             if self.scaner.ip != ip:
                 self.conf_dialog.content_cls.test_ip()
@@ -340,9 +338,8 @@ class InventoryApp(MDApp):
                 self.root.screens[1].update_data()
             self.conf_dialog.dismiss()
             self.conf_dialog = None
-
         elif self.mode == STRANGERS:
-            report = Report(self.dict_file_result)
+            report = Report(self.dict_file_result, "чужие экземпляры", self.item_library, 1)
             report.report_library(self.strangers)
             self.conf_dialog.dismiss()
             self.conf_dialog = None
